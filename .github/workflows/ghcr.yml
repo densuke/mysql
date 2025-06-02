@@ -16,9 +16,13 @@ jobs:
     outputs:
       serial: ${{ steps.serial.outputs.serial }}
     steps:
-      - name: Epoch秒でのシリアル値を生成しておく
+      - name: 日時ベースのシリアルを生成する
         id: serial
-        run: echo "serial=$(date +%s)" >> $GITHUB_OUTPUT
+        # 例: 2025-06-03 12:34:56 -> 20250603123456
+        # 日本時間ベースにすること
+        shell: bash
+        run: |
+          echo "serial=$(TZ=Asia/Tokyo date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
   docker:
     runs-on: ubuntu-latest
     needs: serial
