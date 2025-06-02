@@ -2,6 +2,9 @@
 
 
 # Wait for the database to be ready
-mysqladmin ping -h localhost --silent -h db \
+mysqladmin ping --silent -h db \
     -u "${MYSQL_USER}" --password="${MYSQL_PASSWORD}" \
-    --wait=1
+    --connect-timeout=1 ||
+mysqladmin ping -h localhost --silent \
+    -u "${MYSQL_USER}" --password="${MYSQL_PASSWORD}" \
+    --connect-timeout=1
