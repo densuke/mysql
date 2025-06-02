@@ -20,6 +20,7 @@ jobs:
         id: serial
         # 例: 2025-06-03 12:34:56 -> 20250603123456
         # 日本時間ベースにすること
+        shell: bash
         run: |
           echo "serial=$(TZ=Asia/Tokyo date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
       - name: シリアルの確認出力
