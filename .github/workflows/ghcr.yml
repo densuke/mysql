@@ -23,10 +23,6 @@ jobs:
         shell: bash
         run: |
           echo "serial=$(TZ=Asia/Tokyo date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
-      - name: シリアルの確認出力
-        run: |
-          echo "シリアル: ${{ steps.serial.outputs.serial }}"
-        shell: bash
   docker:
     runs-on: ubuntu-latest
     needs: serial
