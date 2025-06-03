@@ -1,0 +1,31 @@
+# テスト環境を構築する
+services:
+  init:
+    image: alpine:3.22
+    volumes:
+      - ./:/app
+      - db_data:/var/lib/mysql
+    working_dir: /app
+    command: sh ./makeenv.sh
+  db:
+    build:
+      context: ../build
+      dockerfile: ../build/Dockerfile
+    env_file: env.txt
+
+  shell:
+    build: ./shell
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command: tail -f /dev/null
+    env_file: env.txt
+
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=512m
+    

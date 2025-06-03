@@ -1,0 +1,8 @@
+# テスト環境を構築する
+services:
+  init:
+    image: alpine:3.22
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: sh ./makeenv.sh
