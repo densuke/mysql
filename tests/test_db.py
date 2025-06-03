@@ -10,7 +10,18 @@ def get_database_url():
     MYSQL_HOST = os.environ.get("MYSQL_HOST")
     MYSQL_USER = os.environ.get("MYSQL_USER")
     MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD")
-    return f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
+    DBURL = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
+    print(f"Using database URL: {DBURL}")
+    return DBURL
+
+def test_env_variables_exist(monkeypatch):
+    required_vars = ["MYSQL_DATABASE", "MYSQL_HOST", "MYSQL_USER", "MYSQL_PASSWORD"]
+    # Check that all required environment variables are set
+    for var in required_vars:
+        assert os.environ.get(var) is not None
+    # Optionally, check that get_database_url() does not raise
+    url = get_database_url()
+    assert url.startswith("mysql+pymysql://")   
 
 @pytest.fixture(scope="session")
 def engine():
