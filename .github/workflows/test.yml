@@ -1,0 +1,70 @@
+# テスト環境を構築して、実際に作るDBのイメージがリモートから呼べるかのテストを実行する
+name: ビルドとテスト
+on: 
+    push:
+    pull_request:
+        branches-ignore:
+            - main
+    workflow_dispatch:
+
+# 同時実行しないようにする
+concurrency:
+    group: 'build-and-test'
+    cancel-in-progress: true
+
+# テストの際に書き込みをすることになるので、書き込み権原付で動くようにする。
+permissions:
+    contents: write
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: ソースの取得
+              uses: actions/checkout@v4
+
+            - name: Docker buildxの準備
+              uses: docker/setup-buildx-action@v3
+            
+            - name: テスト前の接続情報作成
+              run: |
+                cd tests
+                while true; do 
+                  rm -f env.txt
+                  bash ./makeenv.sh
+                  # もし右辺がないなら削除してやりなおしへ
+                  grep -q '=$' env.txt && rm -f env.txt
+                  test -e env.txt -a -s env.txt && break
+                  echo "やりなおし"
+                done
+            - name: サービスの起動
+              run: |
+                cd tests
+                docker compose up -d --build
+            - name: テストの実行
+              run: |
+                cd tests
+                # dbサービスがhealthになるまで待つ
+                timeout=60
+                echo "dbサービスがhealthyになるまで待機中..."
+                while ! docker compose ps --format json | jq 'select(.Service == "db") | .Health' > /dev/null; do
+                  sleep 2
+                  timeout=$((timeout - 2))
+                  if [ $timeout -le 0 ]; then
+                    echo "dbサービスがhealthyになりませんでした"
+                    docker compose logs db
+                    exit 1
+                  fi
+                done
+                echo "dbサービスがhealthyになりました"
+                sleep 5
+                exit 0
+            - name: テスト実行
+              run: |
+                cd tests
+                docker compose exec shell uv run pytest
+            - name: テスト後のクリーンアップ
+              run: |
+                cd tests
+                docker compose down --rmi all -v -t 1
+                docker volume prune -f
+                docker network prune -f

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 
@@ -12,16 +12,25 @@ set -e
 gen_random_text() {
     length=${1:-16}
     charset="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    # charsetを使って、$length文の長さの文字列を生成する
     ret=""
     for num in $(seq $length); do
-        index=$((RANDOM % ${#charset}))
-        ret="${ret}${charset:index:1}"
+        while :; do
+            index=$(od -An -N2 -i /dev/urandom | awk -v len=${#charset} '{if($1!=""){print $1 % len}}')
+            # indexが空や0ならやり直し
+            if [ -z "$index" ]; then
+                continue
+            fi
+            # indexが数字かつ0以上かつcharset長未満
+            if echo "$index" | grep -Eq '^[0-9]+$' && [ "$index" -ge 0 ] && [ "$index" -lt "${#charset}" ]; then
+                break
+            fi
+        done
+        char="${charset:$index:1}"
+        ret="${ret}${char}"
     done
     echo "$ret"
     return 0
 }
-
 if [ ! -f env.txt.in ]; then
     echo "env.txt.in not found"
     exit 1
