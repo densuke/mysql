@@ -30,14 +30,21 @@ jobs:
             - name: テスト前の接続情報作成
               run: |
                 cd tests
-                rm -f env.txt
-                bash ./makeenv.sh
-                test -e env.txt -a -s env.txt
-
+                while true; do 
+                  rm -f env.txt
+                  bash ./makeenv.sh
+                  # もし右辺がないなら削除してやりなおしへ
+                  grep -q '=$' env.txt && rm -f env.txt
+                  test -e env.txt -a -s env.txt && break
+                  echo "やりなおし"
+                done
+            - name: サービスの起動
+              run: |
+                cd tests
+                docker compose up -d --build
             - name: テストの実行
               run: |
                 cd tests
-                docker compose up -d
                 # dbサービスがhealthになるまで待つ
                 timeout=60
                 echo "dbサービスがhealthyになるまで待機中..."
@@ -57,6 +64,7 @@ jobs:
                 cd tests
                 cat env.txt
                 docker compose exec shell uv run envcheck.py
+                sleep 5
             - name: テスト実行
               run: |
                 cd tests
