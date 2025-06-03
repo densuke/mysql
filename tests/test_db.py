@@ -50,7 +50,7 @@ def session(connection, Session):
         sess.close()
 
 def test_connection(connection):
-    assert connection.closed == False
+    assert not connection.closed
 
 def test_create_table(connection):
     inspector = inspect(connection)
