@@ -11,7 +11,7 @@ def get_database_url():
     MYSQL_USER = os.environ.get("MYSQL_USER")
     MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD")
     DBURL = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
-    print(f"Using database URL: {DBURL}")
+    
     return DBURL
 
 def test_env_variables_exist(monkeypatch):

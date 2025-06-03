@@ -41,9 +41,6 @@ sed -e "s/@dbname@/$(gen_random_text 8)/g" \
     -e "s/@user@/$(gen_random_text 8)/g" \
     -e "s/@password@/$(gen_random_text 16)/g" \
     env.txt.in > env.txt
-    echo "===="
-    cat env.txt
-    echo "===="
 if [ $? -ne 0 ]; then
     echo "Failed to generate env.txt"
     exit 1
