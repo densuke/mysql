@@ -57,12 +57,6 @@ jobs:
                 done
                 echo "dbサービスがhealthyになりました"
                 exit 0
-            - name: 環境変数確認
-              run: |
-                cd tests
-                cat env.txt
-                docker compose exec shell uv run envcheck.py
-                sleep 5
             - name: テスト実行
               run: |
                 cd tests
