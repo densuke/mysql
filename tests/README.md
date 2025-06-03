@@ -14,7 +14,7 @@ PyTestとSQLAlchemyを使用して、データベースのテストを行いま�
 
 1. 接続情報を生成するために、以下のコマンドを実行してください
     ```bash
-    $ docker compose -f compose_init.yml run --rm init
+    $ bash ./makeenv.sh
     ```
 2. テストを実行します、DBを起動して、テストコンテナを起動します。
     ```bash
