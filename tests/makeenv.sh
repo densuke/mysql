@@ -15,8 +15,11 @@ gen_random_text() {
     # charsetを使って、$length文の長さの文字列を生成する
     ret=""
     for num in $(seq $length); do
-        index=$((RANDOM % ${#charset}))
-        ret="${ret}${charset:index:1}"
+        # 0から$((${#charset} - 1))の範囲のランダムな数値を生成する
+        index=$(od -An -N2 -i /dev/urandom | awk -v len=${#charset} '{print $1 % len}')
+        # charsetのindex番目の文字をretに追加する (POSIX互換)
+        char=$(expr substr "$charset" $(($index + 1)) 1)
+        ret="${ret}${char}"
     done
     echo "$ret"
     return 0
