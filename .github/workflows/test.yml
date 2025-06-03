@@ -1,0 +1,71 @@
+# テスト環境を構築して、実際に作るDBのイメージがリモートから呼べるかのテストを実行する
+name: ビルドとテスト
+on: 
+    push:
+        branches:
+            - main
+    pull_request:
+        branches-ignore:
+            - main
+    workflow_dispatch:
+
+# 同時実行しないようにする
+concurrency:
+    group: 'build-and-test'
+    cancel-in-progress: true
+
+# テストの際に書き込みをすることになるので、書き込み権原付で動くようにする。
+permissions:
+    contents: write
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: ソースの取得
+              uses: actions/checkout@v4
+
+            - name: Docker buildxの準備
+              uses: docker/setup-buildx-action@v3
+            
+            - name: テスト前の接続情報作成
+              run: |
+                cd tests
+                rm -f env.txt
+                sh ./makeenv.sh
+                test -e env.txt -a -s env.txt
+
+            - name: テストの実行
+              run: |
+                cd tests
+                docker compose up -d
+                # dbサービスがhealthになるまで待つ
+                timeout=60
+                echo "dbサービスがhealthyになるまで待機中..."
+                while ! docker compose ps --format json | jq 'select(.Service == "db") | .Health' > /dev/null; do
+                  sleep 2
+                  timeout=$((timeout - 2))
+                  if [ $timeout -le 0 ]; then
+                    echo "dbサービスがhealthyになりませんでした"
+                    docker compose logs db
+                    exit 1
+                  fi
+                done
+                echo "dbサービスがhealthyになりました"
+                exit 0
+            - name: 少し待つ
+              run: sleep 5
+            - name: 環境変数確認
+              run: |
+                cd tests
+                cat env.txt
+                docker compose exec shell uv run envcheck.py
+            - name: テスト実行
+              run: |
+                cd tests
+                docker compose exec shell uv run pytest
+            - name: テスト後のクリーンアップ
+              run: |
+                cd tests
+                docker compose down --rmi all -v
+                docker volume prune -f
+                docker network prune -f
