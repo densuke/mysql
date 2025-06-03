@@ -95,7 +95,7 @@ def test_select_multiple_rows(session, test_table):
     result_names = [row["name"] for row in results]
     for name in names:
         assert name in result_names
-    assert len(results) >= 3
+    assert len(results) == len(names)
 
 def test_select_with_condition(session, test_table):
     session.execute(test_table.insert().values(name="Henry"))
