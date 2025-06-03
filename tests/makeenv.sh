@@ -7,13 +7,13 @@
 # - @password@
 # が含まれているため、ここを置き換える
 
-function gen_random_text() {
-    local length=${1:-16}
-    local charset="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+gen_random_text() {
+    length=${1:-16}
+    charset="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     # charsetを使って、$length文の長さの文字列を生成する
     ret=""
     for num in $(seq $length); do
-        local index=$((RANDOM % ${#charset}))
+        index=$((RANDOM % ${#charset}))
         ret="${ret}${charset:index:1}"
     done
     echo "$ret"
