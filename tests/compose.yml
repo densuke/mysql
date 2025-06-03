@@ -4,6 +4,7 @@ services:
     image: alpine:3.22
     volumes:
       - ./:/app
+      - db_data:/var/lib/mysql
     working_dir: /app
     command: sh ./makeenv.sh
   db:
@@ -17,7 +18,6 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-      - db_data:/var/lib/mysql
     command: tail -f /dev/null
     env_file: env.txt
 
