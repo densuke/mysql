@@ -31,7 +31,7 @@ jobs:
               run: |
                 cd tests
                 rm -f env.txt
-                sh ./makeenv.sh
+                bash ./makeenv.sh
                 test -e env.txt -a -s env.txt
 
             - name: テストの実行
