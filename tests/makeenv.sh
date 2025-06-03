@@ -1,4 +1,6 @@
 #!/bin/sh
+set -e
+
 
 # ファイルenv.txt.inからenv.txtを生成する
 # もとのファイルにはそれぞれ
